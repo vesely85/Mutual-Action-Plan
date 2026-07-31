@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="true">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/tokens/colors.css">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/tokens/typography.css">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/tokens/base.css">
+<link rel="stylesheet" href="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/styles.css">
+<script src="_ds/findd-design-system-2a14d869-6893-456f-bf1a-7413e96e36ab/_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: #EFF3F6; font-family: Roboto, system-ui, sans-serif; }
+  a { color: #2F7CF6; text-decoration: none; }
+  a:hover { color: #3919FF; text-decoration: underline; }
+  [data-edit]:focus { outline: 2px solid #2F7CF6; outline-offset: 2px; border-radius: 4px; }
+  @page { size: letter portrait; margin: 13mm 12mm; }
+  @media print {
+    html, body { background: #FFFFFF !important; }
+    [data-noprint] { display: none !important; }
+    [data-sheet] { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; max-width: none !important; }
+    [data-shell] { padding: 0 !important; background: #FFFFFF !important; }
+  }
+</style>
+</helmet>
+
+<div data-shell="1" style="min-height:100vh;background:#EFF3F6;padding:0 0 64px 0;color:#555555">
+
+  <div data-noprint="1" style="position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid #E6E6E6">
+    <div style="max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <img src="assets/logo-findd-blue.png" alt="Findd" style="height:24px;width:auto;display:block">
+      <div style="width:1px;height:24px;background:#E6E6E6"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.onClick }}" style="border:1px solid {{ n.border }};background:{{ n.bg }};color:{{ n.fg }};font:700 12px/1 Roboto,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border-radius:999px;cursor:pointer;transition:all .18s cubic-bezier(.22,.61,.36,1)">{{ n.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button onClick="{{ toggleViewAll }}" title="Show one section or the whole document" style="display:flex;align-items:center;gap:9px;border:none;background:none;cursor:pointer;padding:0">
+          <span style="width:38px;height:22px;border-radius:999px;background:{{ viewAllTrackBg }};position:relative;transition:background .18s cubic-bezier(.22,.61,.36,1);display:block">
+            <span style="position:absolute;top:3px;left:{{ viewAllKnobX }};width:16px;height:16px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(11,15,36,.35);transition:left .18s cubic-bezier(.22,.61,.36,1)"></span>
+          </span>
+          <span style="font:400 13px/1 Roboto,sans-serif;color:#555555">Full document</span>
+        </button>
+        <button onClick="{{ toggleEdit }}" title="Lock or unlock inline editing" style="display:flex;align-items:center;gap:9px;border:none;background:none;cursor:pointer;padding:0">
+          <span style="width:38px;height:22px;border-radius:999px;background:{{ editTrackBg }};position:relative;transition:background .18s cubic-bezier(.22,.61,.36,1);display:block">
+            <span style="position:absolute;top:3px;left:{{ editKnobX }};width:16px;height:16px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(11,15,36,.35);transition:left .18s cubic-bezier(.22,.61,.36,1)"></span>
+          </span>
+          <span style="font:400 13px/1 Roboto,sans-serif;color:#555555">Editing</span>
+        </button>
+        <button onClick="{{ openExport }}" style="border:none;background:#2F7CF6;color:#fff;font:700 12px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(47,124,246,.32);transition:all .18s cubic-bezier(.22,.61,.36,1)" style-hover="background:#4a8cf8" style-active="transform:scale(.97)">Export PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div data-sheet="1" style="max-width:1180px;margin:28px auto 0;background:#FFFFFF;border:1px solid #E6E6E6;border-radius:16px;box-shadow:0 10px 40px rgba(11,15,36,.07);padding:56px 56px 48px">
+
+    <sc-if value="{{ showOverview }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Overview">
+        <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#2F7CF6;margin-bottom:16px">Mutual Action Plan</div>
+        <h1 data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ header.onTitle }}" style="font:700 40px/1.12 Roboto,sans-serif;letter-spacing:-.02em;color:#000000;margin:0 0 16px;text-wrap:pretty">{{ header.title }}</h1>
+        <p data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ header.onSubtitle }}" style="font:400 17px/1.6 Roboto,sans-serif;color:#555555;margin:0 0 40px;max-width:900px;text-wrap:pretty">{{ header.subtitle }}</p>
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px;border-top:1px solid #E6E6E6;padding-top:8px;margin-bottom:44px">
+          <sc-for list="{{ meta }}" as="m" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:150px 1fr;gap:16px;padding:13px 0;border-bottom:1px solid #E6E6E6;align-items:baseline">
+              <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ m.onLabel }}" style="font:700 11px/1.4 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8A8F99">{{ m.label }}</div>
+              <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ m.onValue }}" style="font:400 15px/1.5 Roboto,sans-serif;color:#0B0F24">{{ m.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#0B0F24;border-radius:16px;padding:36px 40px;margin-bottom:44px;break-inside:avoid">
+          <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#CCDBF8;margin-bottom:14px">Why now</div>
+          <p data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ header.onWhy }}" style="font:400 16px/1.7 Roboto,sans-serif;color:#CCDBF8;margin:0;text-wrap:pretty">{{ header.whyNow }}</p>
+        </div>
+
+        <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#2F7CF6;margin-bottom:18px">The three growth areas</div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-bottom:48px">
+          <sc-for list="{{ pillars }}" as="p" hint-placeholder-count="3">
+            <div style="border:1px solid #E6E6E6;border-radius:16px;padding:26px 24px;break-inside:avoid">
+              <div style="width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,#2F7CF6 0%,#3919FF 100%);color:#fff;font:700 15px/34px Roboto,sans-serif;text-align:center;margin-bottom:16px">{{ p.num }}</div>
+              <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ p.onName }}" style="font:700 18px/1.3 Roboto,sans-serif;color:#0B0F24;margin-bottom:10px">{{ p.name }}</div>
+              <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ p.onDesc }}" style="font:400 14px/1.6 Roboto,sans-serif;color:#555555;text-wrap:pretty">{{ p.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ showRevenue }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-bottom:48px;break-inside:avoid">
+            <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#2F7CF6;margin-bottom:18px">Revenue impact</div>
+            <div style="border:1px solid #E6E6E6;border-radius:16px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;background:#EFF3F6;padding:12px 22px;font:700 11px/1.4 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8A8F99">
+                <div>Initiative</div><div style="text-align:right">Additional MRR</div><div style="text-align:right">Additional ARR</div>
+              </div>
+              <sc-for list="{{ revenue }}" as="r" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:15px 22px;border-top:1px solid #E6E6E6;align-items:baseline">
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onInitiative }}" style="font:400 15px/1.4 Roboto,sans-serif;color:#0B0F24">{{ r.initiative }}</div>
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onMrr }}" style="font:400 15px/1.4 'Roboto Mono',ui-monospace,monospace;color:#555555;text-align:right">{{ r.mrr }}</div>
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onArr }}" style="font:400 15px/1.4 'Roboto Mono',ui-monospace,monospace;color:#555555;text-align:right">{{ r.arr }}</div>
+                </div>
+              </sc-for>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:16px 22px;border-top:1.5px solid #2F7CF6;background:#E7F0FE;align-items:baseline">
+                <div style="font:700 15px/1.4 Roboto,sans-serif;color:#0B0F24">Total</div>
+                <div style="font:700 15px/1.4 'Roboto Mono',ui-monospace,monospace;color:#2F7CF6;text-align:right">{{ totalMrr }}</div>
+                <div style="font:700 15px/1.4 'Roboto Mono',ui-monospace,monospace;color:#2F7CF6;text-align:right">{{ totalArr }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="break-inside:avoid">
+          <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#2F7CF6;margin-bottom:18px">Governance &amp; cadence</div>
+          <div style="border-top:1px solid #E6E6E6">
+            <sc-for list="{{ governance }}" as="g" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:16px 0;border-bottom:1px solid #E6E6E6;align-items:baseline">
+                <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ g.onLabel }}" style="font:700 15px/1.4 Roboto,sans-serif;color:#0B0F24">{{ g.label }}</div>
+                <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ g.onValue }}" style="font:400 15px/1.6 Roboto,sans-serif;color:#555555;text-wrap:pretty">{{ g.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-for list="{{ areas }}" as="a" hint-placeholder-count="1">
+      <section data-screen-label="{{ a.nav }}" style="break-before:{{ a.breakBefore }};padding-top:{{ a.padTop }}">
+        <div style="font:700 12px/1 Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#2F7CF6;margin-bottom:16px">{{ a.nav }}</div>
+        <h2 data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ a.onTitle }}" style="font:700 34px/1.15 Roboto,sans-serif;letter-spacing:-.02em;color:#000000;margin:0 0 16px;text-wrap:pretty">{{ a.title }}</h2>
+        <p data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ a.onObjective }}" style="font:400 16px/1.65 Roboto,sans-serif;color:#555555;margin:0 0 22px;max-width:920px;text-wrap:pretty">{{ a.objective }}</p>
+        <sc-if value="{{ showRevenue }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;margin-bottom:38px;flex-wrap:wrap">
+            <div style="border:1px solid #CCDBF8;background:#E7F0FE;border-radius:999px;padding:8px 18px;font:700 13px/1.3 'Roboto Mono',ui-monospace,monospace;color:#2F7CF6">Additional MRR&nbsp;&nbsp;<span data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ a.onMrr }}">{{ a.mrr }}</span></div>
+            <div style="border:1px solid #CCDBF8;background:#E7F0FE;border-radius:999px;padding:8px 18px;font:700 13px/1.3 'Roboto Mono',ui-monospace,monospace;color:#2F7CF6">Additional ARR&nbsp;&nbsp;<span data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ a.onArr }}">{{ a.arr }}</span></div>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ a.groups }}" as="g" hint-placeholder-count="3">
+          <div style="margin-bottom:34px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ g.onName }}" style="font:700 16px/1.3 Roboto,sans-serif;color:#0B0F24">{{ g.name }}</div>
+              <div style="flex:1;height:1px;background:#E6E6E6"></div>
+              <button data-noprint="1" onClick="{{ g.addRow }}" style="display:{{ g.addDisplay }};border:1px solid #CCDBF8;background:#fff;color:#2F7CF6;font:700 11px/1 Roboto,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:999px;cursor:pointer" style-hover="background:#E7F0FE">+ Row</button>
+            </div>
+            <div style="border:1px solid #E6E6E6;border-radius:16px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:2.3fr .85fr 1fr 1.25fr 2.6fr;gap:16px;background:#EFF3F6;padding:11px 46px 11px 20px;font:700 11px/1.4 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8A8F99">
+                <div>Step</div><div>Date</div><div>Status</div><div>By who</div><div>Purpose</div>
+              </div>
+              <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                <div style="position:relative;display:grid;grid-template-columns:2.3fr .85fr 1fr 1.25fr 2.6fr;gap:16px;padding:14px 46px 14px 20px;border-top:1px solid #E6E6E6;align-items:start;break-inside:avoid">
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onTask }}" style="font:500 14px/1.5 Roboto,sans-serif;color:#0B0F24;text-wrap:pretty">{{ r.task }}</div>
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onDate }}" style="font:400 13px/1.5 'Roboto Mono',ui-monospace,monospace;color:#555555">{{ r.date }}</div>
+                  <div>
+                    <button onClick="{{ r.cycle }}" title="Click to change status" style="border:1px solid {{ r.statusBorder }};background:{{ r.statusBg }};color:{{ r.statusFg }};font:700 11px/1 Roboto,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:all .18s cubic-bezier(.22,.61,.36,1)" style-active="transform:scale(.97)">{{ r.status }}</button>
+                  </div>
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onWho }}" style="font:400 13px/1.5 Roboto,sans-serif;color:#555555;text-wrap:pretty">{{ r.who }}</div>
+                  <div data-edit="1" contentEditable="{{ edit }}" suppressContentEditableWarning="{{ true }}" onBlur="{{ r.onPurpose }}" style="font:400 13px/1.6 Roboto,sans-serif;color:#555555;text-wrap:pretty">{{ r.purpose }}</div>
+                  <button data-noprint="1" onClick="{{ r.remove }}" title="Delete row" style="display:{{ r.removeDisplay }};position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:999px;border:1px solid #E6E6E6;background:#fff;color:#8A8F99;font:400 14px/1 Roboto,sans-serif;cursor:pointer" style-hover="color:#FF5A13;border-color:#FF5A13">×</button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+    </sc-for>
+  </div>
+
+  <div data-noprint="1" style="max-width:1180px;margin:18px auto 0;padding:0 4px;display:flex;justify-content:space-between;font:400 12px/1.5 Roboto,sans-serif;color:#8A8F99">
+    <div>Edits save automatically in this browser.</div>
+    <button onClick="{{ resetAll }}" style="border:none;background:none;color:#8A8F99;font:400 12px/1.5 Roboto,sans-serif;cursor:pointer;text-decoration:underline">Reset to original plan</button>
+  </div>
+
+  <sc-if value="{{ exportOpen }}">
+    <div data-noprint="1" style="position:fixed;inset:0;z-index:80;background:rgba(11,15,36,.45);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="background:#fff;border-radius:16px;width:100%;max-width:460px;padding:32px;box-shadow:0 24px 60px rgba(11,15,36,.3)">
+        <div style="font:700 22px/1.25 Roboto,sans-serif;color:#000000;margin-bottom:6px">Export to PDF</div>
+        <div style="font:400 14px/1.6 Roboto,sans-serif;color:#555555;margin-bottom:24px">Choose what goes into the document.</div>
+        <div style="display:flex;gap:8px;margin-bottom:22px">
+          <button onClick="{{ setScopeCurrent }}" style="flex:1;border:1.5px solid {{ scopeCurrentBorder }};background:{{ scopeCurrentBg }};color:{{ scopeCurrentFg }};font:700 12px/1.3 Roboto,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:14px 10px;border-radius:12px;cursor:pointer">Current section</button>
+          <button onClick="{{ setScopeAll }}" style="flex:1;border:1.5px solid {{ scopeAllBorder }};background:{{ scopeAllBg }};color:{{ scopeAllFg }};font:700 12px/1.3 Roboto,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:14px 10px;border-radius:12px;cursor:pointer">All sections</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:26px;opacity:{{ pickerOpacity }};pointer-events:{{ pickerEvents }}">
+          <sc-for list="{{ exportList }}" as="s" hint-placeholder-count="4">
+            <button onClick="{{ s.toggle }}" style="display:flex;align-items:center;gap:12px;border:none;background:none;padding:9px 0;cursor:pointer;text-align:left">
+              <span style="width:34px;height:20px;border-radius:999px;background:{{ s.trackBg }};position:relative;flex:none;transition:background .18s cubic-bezier(.22,.61,.36,1)">
+                <span style="position:absolute;top:3px;left:{{ s.knobX }};width:14px;height:14px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(11,15,36,.3);transition:left .18s cubic-bezier(.22,.61,.36,1)"></span>
+              </span>
+              <span style="font:400 14px/1.4 Roboto,sans-serif;color:#0B0F24">{{ s.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onClick="{{ closeExport }}" style="border:1px solid #E6E6E6;background:#fff;color:#555555;font:700 12px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:13px 20px;border-radius:999px;cursor:pointer">Cancel</button>
+          <button onClick="{{ doPrint }}" style="border:none;background:#2F7CF6;color:#fff;font:700 12px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:13px 22px;border-radius:999px;cursor:pointer;box-shadow:0 6px 18px rgba(47,124,246,.32)" style-active="transform:scale(.97)">Export</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showRevenue&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+const STATUSES = [
+  { name: "Planned",     bg: "#EFF3F6", fg: "#555555", border: "#E6E6E6" },
+  { name: "In Progress", bg: "#E7F0FE", fg: "#2F7CF6", border: "#CCDBF8" },
+  { name: "Complete",    bg: "#E4F5EC", fg: "#1F9D55", border: "#BFE6D1" },
+  { name: "At Risk",     bg: "#FFF6E0", fg: "#B37400", border: "#F6DFA6" },
+  { name: "Blocked",     bg: "#FFE9E0", fg: "#FF5A13", border: "#FFC9B4" }
+];
+
+const DEFAULTS = {
+  header: {
+    title: "Findd + Vonachen Group | Mutual Action Plan",
+    subtitle: "A shared roadmap across three growth areas: (1) Unified Time Capture, (2) WorkOps as a Win & Defend Strategy, and (3) Intelligence that drives better outcomes for the clients Vonachen serves.",
+    whyNow: "With the new Findd agreement in place (signed July 2026), WorkOps live and validated at John Deere sites (including offline mode), QA enhancements moving to dual entry in August, and new wins like Indianapolis coming online, both teams are positioned to move from project-by-project execution to a sequenced growth plan. This plan aligns leadership on what we deliver, when, and the business outcome each step drives — so Findd helps Vonachen retain and grow the clients it serves.",
+    meta: [
+      { label: "Company", value: "Vonachen Group" },
+      { label: "Primary Contact", value: "Alex Crowley, Chief Client Officer" },
+      { label: "Executive Sponsors", value: "Alex Crowley (Vonachen)  |  Dan Shaw (Findd)" },
+      { label: "Project Owners", value: "Josh Vesely, Dan Shaw (Findd)  |  Max Vonachen (Vonachen)" },
+      { label: "Delivery Leads", value: "Lydia Lund, Tom Loveland (Findd)  |  Laura Roy, Deanna Berntgen, Jeff Durand (Vonachen)" },
+      { label: "Plan Horizon", value: "August 2026 – December 2027" }
+    ]
+  },
+  pillars: [
+    { num: "1", name: "Unified Time Capture", desc: "Replace all WinTeam time capture with Findd so there is one source of truth for time across every Vonachen employee — feeding payroll, job costing, and service intelligence from a single system." },
+    { num: "2", name: "WorkOps: Win & Defend", desc: "Use WorkOps service validation to protect existing client business at renewal, strengthen new bids with proof of service, and deliver clean, repeatable client implementations." },
+    { num: "3", name: "Intelligence", desc: "Turn combined time + WorkOps data into insight that helps Vonachen spot at-risk accounts early and identify expansion opportunities across the customer lifecycle." }
+  ],
+  revenue: [
+    { initiative: "1. Unified Time Capture", mrr: "$4,000", arr: "$48,000" },
+    { initiative: "2. WorkOps: Win & Defend", mrr: "$4,500", arr: "$54,000" },
+    { initiative: "3. Intelligence", mrr: "$1,500", arr: "$18,000" }
+  ],
+  governance: [
+    { label: "Kickoff: Executive alignment meeting", value: "September 2026 (Peoria or call) — review this plan, agree on sequencing, owners, and success measures." },
+    { label: "Weekly delivery touchpoint", value: "Lydia Lund + Vonachen project team — implementation status, blockers, next steps (existing cadence)." },
+    { label: "Monthly progress summary", value: "Written status update to the full stakeholder group (QA, periodics, app releases, milestones)." },
+    { label: "Quarterly executive business review", value: "Alex Crowley + Dan Shaw / Josh Vesely — review outcomes against this plan, re-sequence priorities, review client health insights." }
+  ],
+  areas: [
+    {
+      id: "ga1", nav: "Growth Area 1",
+      title: "Time Capture in Findd — One Source of Truth",
+      objective: "Objective: retire all WinTeam time capture and consolidate every Vonachen employee onto Findd time capture, so payroll, job costing, and service data run from a single, trusted source of time.",
+      mrr: "$4,000", arr: "$48,000",
+      groups: [
+        { name: "Problem Identification", rows: [
+          { task: "Confirm the business objective: one source of truth for time", date: "Sep 2026", status: "Planned", who: "Alex Crowley / Josh Vesely", purpose: "Today time lives in two systems — Findd time clocks (~700–800 employees) and WinTeam/eHub for the rest. Dual systems create reconciliation work, data gaps, and limit what the data can tell us." },
+          { task: "Current-state map of every WinTeam time capture point", date: "Sep 2026", status: "Planned", who: "Max Vonachen / Lydia Lund", purpose: "Inventory every division, site, and employee population capturing time in WinTeam today — method, device, supervisor workflow, and payroll handoff." },
+          { task: "Stakeholder interviews: Payroll, HR, Finance, Operations, IT", date: "Sep–Oct 2026", status: "Planned", who: "TBD", purpose: "Get the full picture of requirements and concerns." }
+        ]},
+        { name: "Solution Evaluation", rows: [
+          { task: "Solution validation: how does full time capture need to look?", date: "Oct 2026", status: "Planned", who: "Lydia Lund / Max Vonachen", purpose: "Define workflows, clock types (tablet, mobile, phone-in), supervisor edits, exceptions, and approval flows for each population." },
+          { task: "WinTeam integration specification", date: "Oct 2026", status: "Planned", who: "Findd Product / Jeff Durand", purpose: "Define how Findd time data feeds WinTeam payroll and job costing during the transition (API scope, formats, sync frequency) so finance granularity is preserved." },
+          { task: "Time capture policy review (incl. biometrics posture)", date: "Oct 2026", status: "Planned", who: "Ryan Johnson / Vonachen HR & Legal", purpose: "Confirm capture methods per company policy. If biometric verification is ever revisited, it happens only with full consent and notification controls; the plan works without it." }
+        ]},
+        { name: "Validation", rows: [
+          { task: "Group selection & success criteria", date: "Nov 2026", status: "Planned", who: "TBD", purpose: "Choose the pilot population and define what 'working' looks like before go-live." },
+          { task: "Pilot with parallel payroll runs", date: "Nov–Dec 2026", status: "Planned", who: "TBD", purpose: "Run Findd time capture alongside WinTeam for a full cycle and reconcile results before committing." },
+          { task: "Business case: value of a single time system", date: "Jan 2027", status: "Planned", who: "Dan Shaw / Josh Vesely", purpose: "Quantify admin time saved, reconciliation eliminated, error reduction, and what unified time data unlocks for client-facing intelligence (Growth Area 3)." }
+        ]},
+        { name: "Rollout & Cutover", rows: [
+          { task: "Phased migration schedule by division/region", date: "Q1 2027", status: "Planned", who: "TBD", purpose: "Sequence the migration so each division moves with support in place." },
+          { task: "Wave rollouts with go-live support", date: "Q1–Q3 2027", status: "Planned", who: "TBD", purpose: "Execute wave by wave with on-site and remote support at each go-live." },
+          { task: "Retire WinTeam time capture", date: "Q4 2027", status: "Planned", who: "TBD", purpose: "Decommission the legacy capture path once every population is live in Findd." },
+          { task: "Success criteria met: all ~3,000 employees on Findd time capture", date: "Dec 2027", status: "Planned", who: "TBD", purpose: "One system of record for time across the business." }
+        ]}
+      ]
+    },
+    {
+      id: "ga2", nav: "Growth Area 2",
+      title: "WorkOps as a Win & Defend Strategy",
+      objective: "Objective: make WorkOps service validation the proof behind Vonachen's client relationships — clean implementations at existing clients, differentiated new bids, and data-backed renewals.",
+      mrr: "$4,500", arr: "$54,000",
+      groups: [
+        { name: "Defend: Stabilize & Complete Current Implementations", rows: [
+          { task: "QA enhancements live; dual entry vs. WinTeam/eHub", date: "Aug 2026", status: "In Progress", who: "Lydia Lund / Deanna Berntgen", purpose: "QA filtering and access improvements are in place; dual entry runs through the transition, with full switch to Findd QA targeted for August." },
+          { task: "Periodic tasks configured and validated", date: "Aug–Sep 2026", status: "In Progress", who: "Lydia Lund / Deanna Berntgen", purpose: "Complete periodics setup with timeframes aligned to contract requirements, so scheduled work is provable alongside daily routes." },
+          { task: "Offline WorkOps app fix deployed to devices", date: "Aug 2026", status: "In Progress", who: "Findd Eng / Jeff Durand & Charlie Wallace", purpose: "Ship the filtering fix APK and confirm stable offline operation on the John Deere tablets." },
+          { task: "Dubuque QA validation complete", date: "Sep 2026", status: "In Progress", who: "Lydia Lund / Deanna Berntgen", purpose: "Close out Dubuque QA testing with client feedback confirmed." },
+          { task: "Standard implementation playbook documented", date: "Oct 2026", status: "Planned", who: "TBD", purpose: "Capture what we've learned (config templates, task libraries, timeline, roles) so each new site implementation is faster and more predictable than the last." }
+        ]},
+        { name: "Win: New Client Implementations", rows: [
+          { task: "Indianapolis implementation plan & kickoff", date: "Sep 2026", status: "Planned", who: "TBD", purpose: "Apply the playbook to the new Indianapolis contract — scope, configure, train, and go live on a committed timeline." },
+          { task: "Sequence the six client sites requesting WorkOps", date: "Sep 2026", status: "Planned", who: "TBD", purpose: "Jointly prioritize the six identified client sites; commit sites, owners, and target go-live dates for each." },
+          { task: "Site-by-site rollouts per agreed sequence", date: "Q4 2026 – Q2 2027", status: "Planned", who: "TBD", purpose: "Execute implementations in order, applying playbook learnings each time." }
+        ]},
+        { name: "Win: Bids", rows: [
+          { task: "WorkOps bid kit: proposal language, demo, sample dashboards", date: "Oct 2026", status: "Planned", who: "TBD", purpose: "Package service validation as a differentiator Vonachen can put in front of prospects — 'here is how you'll see, verify, and measure our service.'" },
+          { task: "Include WorkOps in active bids and RFPs", date: "Ongoing from Oct 2026", status: "Planned", who: "TBD", purpose: "Make service transparency part of Vonachen's standard pitch; Findd supports demos and pilot commitments in pursuit of new contracts." },
+          { task: "Win/loss review on WorkOps-backed bids", date: "Quarterly", status: "Planned", who: "TBD", purpose: "Track where WorkOps influenced outcomes and refine the bid kit accordingly." }
+        ]},
+        { name: "Defend: Renewals", rows: [
+          { task: "Renewal calendar mapped for WorkOps-covered clients", date: "Oct 2026", status: "Planned", who: "TBD", purpose: "Know every renewal date in advance so service validation evidence is prepared before pricing conversations begin." },
+          { task: "Client-facing service validation reports for key accounts", date: "Q4 2026", status: "Planned", who: "TBD", purpose: "Standard reporting for accounts like John Deere: completion rates, QA scores, responsiveness — proof of value delivered under pricing pressure." },
+          { task: "Pre-renewal business reviews with at-risk clients", date: "As scheduled", status: "Planned", who: "TBD", purpose: "Use WorkOps data in client QBRs to defend scope and price with evidence, not assertions." },
+          { task: "Success criteria: playbook-driven implementations, WorkOps in every strategic bid, zero surprise renewals", date: "Mid 2027", status: "Planned", who: "TBD", purpose: "WorkOps is operating as both a retention shield and a growth engine for Vonachen's client portfolio." }
+        ]}
+      ]
+    },
+    {
+      id: "ga3", nav: "Growth Area 3",
+      title: "Intelligence — Better Outcomes Across the Client Lifecycle",
+      objective: "Objective: combine time capture and WorkOps data into one view that helps Vonachen identify at-risk client accounts early, prove value continuously, and spot expansion opportunities.",
+      mrr: "$1,500", arr: "$18,000",
+      groups: [
+        { name: "Data Foundation", rows: [
+          { task: "Define the unified data model: time + WorkOps + assets", date: "Oct 2026", status: "Planned", who: "Findd Product / Max Vonachen", purpose: "One consistent view across WorkOps, HR, and TLM data sources — a singular dashboard rather than separate views per module, reducing user friction." },
+          { task: "Equipment/asset data integration design (EMS)", date: "Sep–Oct 2026", status: "In Progress", who: "Josh Vesely / Max Vonachen & Elsie Wright", purpose: "Fold the equipment management design work into the same dashboard framework; itemization, equipment detail, and service logs stored in the WorkOps database. Design review targeted for the September meeting." },
+          { task: "WinTeam Fixed Asset API evaluation", date: "Sep 2026", status: "In Progress", who: "Findd Eng / Max Vonachen", purpose: "The WT Fixed Asset API supports GET (not POST, possibly PATCH); determine what syncs automatically vs. where Findd becomes the system of record." }
+        ]},
+        { name: "Insight Design", rows: [
+          { task: "Define client health indicators", date: "Nov 2026", status: "Planned", who: "TBD", purpose: "Agree on the signals that matter: task completion %, QA scores, time-to-attention, coverage vs. contract, labor hours vs. budget, ticket trends." },
+          { task: "At-risk account early-warning view", date: "Dec 2026", status: "Planned", who: "TBD", purpose: "Flag accounts where service indicators are slipping — declining completion, QA misses, rising time-to-attention — before the client raises it or a renewal is at stake." },
+          { task: "Expansion opportunity signals", date: "Dec 2026", status: "Planned", who: "TBD", purpose: "Surface where the data shows room to grow: high-performing sites that support a case for added scope, service lines, or new locations with the same client." },
+          { task: "Executive scorecard for Vonachen leadership", date: "Jan 2027", status: "Planned", who: "TBD", purpose: "A leadership-level view across the portfolio: client health, service performance, labor efficiency — grounded in the single source of truth from Growth Area 1." }
+        ]},
+        { name: "Operationalize", rows: [
+          { task: "Monthly account health review cadence", date: "From Jan 2027", status: "Planned", who: "TBD", purpose: "Working session using the health views: what's trending down, what needs intervention, what's ready for an expansion conversation." },
+          { task: "Intelligence in client QBRs and renewal prep", date: "From Q1 2027", status: "Planned", who: "TBD", purpose: "Bring the same data to Vonachen's clients — proving value delivered and framing expansion proposals with evidence (feeds Growth Area 2 renewals and bids)." },
+          { task: "Playbooks: at-risk response & expansion motion", date: "Q1 2027", status: "Planned", who: "TBD", purpose: "Agreed response steps so insight turns into action — intervention plans for at-risk accounts, proposal motion for expansion signals." },
+          { task: "Success criteria: every strategic account reviewed monthly with data", date: "Mid 2027", status: "Planned", who: "TBD", purpose: "At-risk accounts caught early, expansion pipeline sourced from insights — intelligence as a routine management tool, not a once-a-year report." }
+        ]}
+      ]
+    }
+  ]
+};
+
+const KEY = "findd-vonachen-map-v1";
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const money = (s) => Number(String(s).replace(/[^0-9.-]/g, "")) || 0;
+const fmt = (n) => "$" + n.toLocaleString("en-US");
+
+class Component extends DCLogic {
+  state = {
+    data: clone(DEFAULTS),
+    active: "overview",
+    viewAll: false,
+    edit: true,
+    exportOpen: false,
+    printing: false,
+    scope: "current",
+    include: { overview: true, ga1: true, ga2: true, ga3: true }
+  };
+
+  componentDidMount() {
+    try {
+      const raw = window.localStorage.getItem(KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && saved.areas) this.setState({ data: saved });
+      }
+    } catch (e) {}
+    this._after = () => this.setState({ printing: false });
+    window.addEventListener("afterprint", this._after);
+  }
+
+  componentWillUnmount() {
+    if (this._after) window.removeEventListener("afterprint", this._after);
+  }
+
+  save(data) {
+    this.setState({ data });
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  setPath(path, value) {
+    const data = clone(this.state.data);
+    const parts = path.split(".");
+    let node = data;
+    for (let i = 0; i < parts.length - 1; i++) node = node[parts[i]];
+    if (node[parts[parts.length - 1]] === value) return;
+    node[parts[parts.length - 1]] = value;
+    this.save(data);
+  }
+
+  bind(path) {
+    return (e) => this.setPath(path, e.currentTarget.innerText.trim());
+  }
+
+  cycleStatus(ai, gi, ri) {
+    const data = clone(this.state.data);
+    const row = data.areas[ai].groups[gi].rows[ri];
+    const idx = STATUSES.findIndex((s) => s.name === row.status);
+    row.status = STATUSES[(idx + 1) % STATUSES.length].name;
+    this.save(data);
+  }
+
+  addRow(ai, gi) {
+    const data = clone(this.state.data);
+    data.areas[ai].groups[gi].rows.push({ task: "New step", date: "TBD", status: "Planned", who: "TBD", purpose: "Describe the purpose of this step." });
+    this.save(data);
+  }
+
+  removeRow(ai, gi, ri) {
+    const data = clone(this.state.data);
+    data.areas[ai].groups[gi].rows.splice(ri, 1);
+    this.save(data);
+  }
+
+  shownIds() {
+    const s = this.state;
+    if (s.printing) {
+      if (s.scope === "current") return [s.active];
+      return ["overview", "ga1", "ga2", "ga3"].filter((id) => s.include[id]);
+    }
+    if (s.viewAll) return ["overview", "ga1", "ga2", "ga3"];
+    return [s.active];
+  }
+
+  doPrint = () => {
+    this.setState({ exportOpen: false, printing: true }, () => {
+      window.setTimeout(() => window.print(), 120);
+    });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const d = s.data;
+    const edit = s.edit && !s.printing;
+    const shown = this.shownIds();
+    const bind = (p) => this.bind(p);
+
+    const navSource = [{ id: "overview", label: "Overview" }].concat(d.areas.map((a) => ({ id: a.id, label: a.nav })));
+    const nav = navSource.map((n) => {
+      const on = s.viewAll ? shown.indexOf(n.id) > -1 : s.active === n.id;
+      return {
+        label: n.label,
+        onClick: () => this.setState({ active: n.id }),
+        bg: on ? "#2F7CF6" : "#FFFFFF",
+        fg: on ? "#FFFFFF" : "#555555",
+        border: on ? "#2F7CF6" : "#E6E6E6"
+      };
+    });
+
+    const areas = d.areas
+      .map((a, ai) => ({ a, ai }))
+      .filter(({ a }) => shown.indexOf(a.id) > -1)
+      .map(({ a, ai }, order) => ({
+        nav: a.nav,
+        title: a.title,
+        objective: a.objective,
+        mrr: a.mrr,
+        arr: a.arr,
+        breakBefore: order === 0 && shown.indexOf("overview") === -1 ? "auto" : "page",
+        padTop: order === 0 && shown.indexOf("overview") === -1 ? "0" : "56px",
+        onTitle: bind(`areas.${ai}.title`),
+        onObjective: bind(`areas.${ai}.objective`),
+        onMrr: bind(`areas.${ai}.mrr`),
+        onArr: bind(`areas.${ai}.arr`),
+        groups: a.groups.map((g, gi) => ({
+          name: g.name,
+          onName: bind(`areas.${ai}.groups.${gi}.name`),
+          addRow: () => this.addRow(ai, gi),
+          addDisplay: edit ? "block" : "none",
+          rows: g.rows.map((r, ri) => {
+            const st = STATUSES.find((x) => x.name === r.status) || STATUSES[0];
+            return {
+              task: r.task, date: r.date, status: r.status, who: r.who, purpose: r.purpose,
+              statusBg: st.bg, statusFg: st.fg, statusBorder: st.border,
+              cycle: () => this.cycleStatus(ai, gi, ri),
+              remove: () => this.removeRow(ai, gi, ri),
+              removeDisplay: edit ? "block" : "none",
+              onTask: bind(`areas.${ai}.groups.${gi}.rows.${ri}.task`),
+              onDate: bind(`areas.${ai}.groups.${gi}.rows.${ri}.date`),
+              onWho: bind(`areas.${ai}.groups.${gi}.rows.${ri}.who`),
+              onPurpose: bind(`areas.${ai}.groups.${gi}.rows.${ri}.purpose`)
+            };
+          })
+        }))
+      }));
+
+    const exportList = navSource.map((n) => {
+      const on = s.include[n.id];
+      return {
+        label: n.label,
+        toggle: () => this.setState({ include: Object.assign({}, s.include, { [n.id]: !on }) }),
+        trackBg: on ? "#2F7CF6" : "#E6E6E6",
+        knobX: on ? "17px" : "3px"
+      };
+    });
+
+    const allSel = s.scope === "all";
+
+    return {
+      edit,
+      showRevenue: this.props.showRevenue !== false,
+      showOverview: shown.indexOf("overview") > -1,
+      nav,
+      areas,
+      exportOpen: s.exportOpen,
+      exportList,
+      header: {
+        title: d.header.title,
+        subtitle: d.header.subtitle,
+        whyNow: d.header.whyNow,
+        onTitle: bind("header.title"),
+        onSubtitle: bind("header.subtitle"),
+        onWhy: bind("header.whyNow")
+      },
+      meta: d.header.meta.map((m, i) => ({
+        label: m.label, value: m.value,
+        onLabel: bind(`header.meta.${i}.label`),
+        onValue: bind(`header.meta.${i}.value`)
+      })),
+      pillars: d.pillars.map((p, i) => ({
+        num: p.num, name: p.name, desc: p.desc,
+        onName: bind(`pillars.${i}.name`),
+        onDesc: bind(`pillars.${i}.desc`)
+      })),
+      revenue: d.revenue.map((r, i) => ({
+        initiative: r.initiative, mrr: r.mrr, arr: r.arr,
+        onInitiative: bind(`revenue.${i}.initiative`),
+        onMrr: bind(`revenue.${i}.mrr`),
+        onArr: bind(`revenue.${i}.arr`)
+      })),
+      governance: d.governance.map((g, i) => ({
+        label: g.label, value: g.value,
+        onLabel: bind(`governance.${i}.label`),
+        onValue: bind(`governance.${i}.value`)
+      })),
+      totalMrr: fmt(d.revenue.reduce((t, r) => t + money(r.mrr), 0)),
+      totalArr: fmt(d.revenue.reduce((t, r) => t + money(r.arr), 0)),
+      viewAllTrackBg: s.viewAll ? "#2F7CF6" : "#E6E6E6",
+      viewAllKnobX: s.viewAll ? "19px" : "3px",
+      editTrackBg: s.edit ? "#2F7CF6" : "#E6E6E6",
+      editKnobX: s.edit ? "19px" : "3px",
+      toggleViewAll: () => this.setState({ viewAll: !s.viewAll }),
+      toggleEdit: () => this.setState({ edit: !s.edit }),
+      openExport: () => this.setState({ exportOpen: true, scope: s.viewAll ? "all" : "current" }),
+      closeExport: () => this.setState({ exportOpen: false }),
+      setScopeCurrent: () => this.setState({ scope: "current" }),
+      setScopeAll: () => this.setState({ scope: "all" }),
+      scopeCurrentBg: allSel ? "#FFFFFF" : "#E7F0FE",
+      scopeCurrentFg: allSel ? "#555555" : "#2F7CF6",
+      scopeCurrentBorder: allSel ? "#E6E6E6" : "#2F7CF6",
+      scopeAllBg: allSel ? "#E7F0FE" : "#FFFFFF",
+      scopeAllFg: allSel ? "#2F7CF6" : "#555555",
+      scopeAllBorder: allSel ? "#2F7CF6" : "#E6E6E6",
+      pickerOpacity: allSel ? "1" : ".38",
+      pickerEvents: allSel ? "auto" : "none",
+      doPrint: this.doPrint,
+      resetAll: () => {
+        if (window.confirm("Reset every field back to the original plan?")) {
+          try { window.localStorage.removeItem(KEY); } catch (e) {}
+          this.setState({ data: clone(DEFAULTS) });
+        }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
